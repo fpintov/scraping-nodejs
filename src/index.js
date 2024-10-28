@@ -1,6 +1,6 @@
 const express = require('express');
 const { scrapeCementerioMetropolitano } = require('./scraping/cementerioMetropolitano');
-const { scrapeNuestrosParques } = require('./scraping/nuestrosParques(puppeteer)');
+const { scrapeNuestrosParques } = require('./scraping/nuestrosParques');
 const { scrapeSendero } = require('./scraping/sendero');
 
 const app = express();
@@ -19,16 +19,16 @@ app.get('/fallecidos', async (req, res) => {
       scrapeSendero()
     ]);
 
-    console.log(`Total fallecidos cementerioMetropolitano: ${cementerioMetropolitano}`);
+    console.log(`Datos de Cementerio Metropolitano: ${JSON.stringify(cementerioMetropolitano)}`);
     console.log(`Datos de Nuestros Parques: ${JSON.stringify(nuestrosParques)}`);
     console.log(`Datos de Parque del Sendero: ${JSON.stringify(parqueSendero)}`);
 
-    // Combinamos el resultado en un solo objeto plano
-    const resultadoFinal = {
-      cementerioMetropolitano,
+    // Combinamos todos los resultados en un solo array
+    const resultadoFinal = [
+      ...cementerioMetropolitano,
       ...nuestrosParques,
-      ...parqueSendero // Expande los campos de parqueSendero en el objeto principal
-    };
+      ...parqueSendero
+    ];
 
     res.json(resultadoFinal);
 
@@ -41,4 +41,3 @@ app.get('/fallecidos', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}/fallecidos`);
 });
-

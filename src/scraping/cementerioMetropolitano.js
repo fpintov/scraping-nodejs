@@ -3,34 +3,43 @@ const cheerio = require('cheerio');
 
 const scrapeCementerioMetropolitano = async () => {
   try {
-    const url = 'https://cementeriometropolitano.cl/funerales-dia/Index.aspx'; // URL del cementerio
+    const url = 'https://cementeriometropolitano.cl/funerales-dia/Index.aspx'; 
     const { data } = await axios.get(url);
     const $ = cheerio.load(data);
     
-    // Seleccionamos los elementos que contienen la información del obituario
-    // Arreglo para almacenar la información de los funerales
     const funerales = [];
-    
-    // Seleccionamos los elementos con la clase que contiene la información
-    $('.dxcvBreakpointsCard').each((i, el) => {
-      const horaSepultacion = $(el).find('.fas.fa-clock').next().text().trim();
-      const nombre = $(el).find('.fas.fa-user').next().text().trim();
-      const apellido = $(el).find('.fas.fa-user').next().next().text().trim();
-      const ubicacion = $(el).find('.fas.fa-map-marker-alt').next().text().trim();
-      const numeroUbicacion = $(el).find('.fas.fa-map-marker-alt').next().next().text().trim();
 
-      // Guardamos la información en un objeto
+    // Obtener la fecha actual en formato dd-mm-yyyy
+    const fechaActual = new Date();
+    const dia = String(fechaActual.getDate()).padStart(2, '0');
+    const mes = String(fechaActual.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
+    const anio = fechaActual.getFullYear();
+    const fechaServicio = `${dia}-${mes}-${anio}`;
+
+    $('.div_fallecidos').each((i, el) => {
+      // Obtenemos todos los spans dentro del div_fallecidos
+      const spans = $(el).find('span.dxeBase');
+      let nombreCompleto = '';
+
+      // Concatenamos el texto de los spans que contienen el nombre y apellido (excluyendo el primero que es la hora)
+      spans.each((index, span) => {
+        if (index >= 1 && index <= 2) { // Capturamos los spans del nombre y apellido
+          nombreCompleto += $(span).text().trim() + ' ';
+        }
+      });
+
+      nombreCompleto = nombreCompleto.trim(); // Quitamos el espacio extra al final
+
       funerales.push({
-        horaSepultacion,
-        nombreCompleto: `${nombre} ${apellido}`,
-        ubicacion,
-        numeroUbicacion
+        destino: 'Cementerio-Metropolitano',
+        region: 'Región Metropolitana',
+        nombre: nombreCompleto,
+        fechaServicio: fechaServicio // Usamos la fecha actual
       });
     });
 
-    // Devolvemos solo el número de funerales encontrados
-    return funerales.length;
-    
+    return funerales;
+
   } catch (error) {
     console.error('Error haciendo scraping:', error);
     return [];

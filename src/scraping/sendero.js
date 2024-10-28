@@ -16,21 +16,78 @@ const scrapeSendero = async () => {
     // Añadimos una pausa adicional de 3 segundos para dar tiempo a que se carguen los datos
     await new Promise(resolve => setTimeout(resolve, 3000)); // Pausa de 3 segundos
 
-    // Extraer el número de funerales (filas de la tabla)
-    const numFilas = await page.evaluate(() => {
-      const filas = document.querySelectorAll('table.table tbody tr');
-      // Restamos 1 para no contar la fila de encabezado
-      return filas.length - 1;
+    // Extraer los datos de la tabla
+    const scrapingData = await page.evaluate(() => {
+      const rows = Array.from(document.querySelectorAll('tbody tr'));
+      const data = [];
+
+      rows.forEach(row => {
+        let nombre = row.querySelector('td:nth-child(1)')?.innerText.trim();
+        const fechaServicio = row.querySelector('td:nth-child(2)')?.innerText.trim();
+        let region = row.querySelector('td:nth-child(5)')?.innerText.trim();
+
+        // Asignamos la región según el valor extraído
+        switch (region) {
+          case 'CONCEPCION':
+            region = 'Región del Biobío';
+            break;
+          case 'MAIPU':
+            region = 'Región Metropolitana';
+            break;
+          case 'SACRAMENTAL PARQUE PADRE HURTADO':
+            region = 'Región Metropolitana';
+            break;
+          case 'VILLA ALEMANA':
+            region = 'Región de Valparaíso';
+            break;
+          case 'IQUIQUE':
+            region = 'Región de Tarapacá';
+            break;
+          case 'SAN BERNARDO':
+            region = 'Región Metropolitana';
+            break;
+          case 'VALPARAISO':
+            region = 'Región de Valparaíso';
+            break;
+          case 'ARICA':
+            region = 'Región de Arica y Parinacota';
+            break;
+          case 'RANCAGUA':
+            region = "Región de O'Higgins";
+            break;
+          default:
+            region = 'No disponible';
+            break;
+        }
+
+        // Eliminamos 'Q.E.P.D.' del nombre si existe
+        if (nombre) {
+          nombre = nombre.replace('Q.E.P.D', '').trim();
+          nombre = nombre.replace('Sr. ', '').trim();
+          nombre = nombre.replace('Sra. ', '').trim();
+        }
+
+        if (nombre && fechaServicio && region) {
+          data.push({
+            destino: "Parque del Sendero", // Se asigna el destino fijo
+            region: region,
+            nombre: nombre,
+            fechaServicio: fechaServicio
+          });
+        }
+      });
+
+      return data;
     });
 
-    console.log(`Número de funerales: ${numFilas}`);
-
     await browser.close();
-    return { "Parque del Sendero": numFilas };
+
+    // Devolvemos directamente los datos en un formato estandarizado
+    return scrapingData;
 
   } catch (error) {
     console.error('Error haciendo scraping en Parque del Sendero:', error);
-    return { "Parque del Sendero": 0 };
+    return [];
   }
 };
 
