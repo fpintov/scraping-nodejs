@@ -19,9 +19,9 @@ app.get('/fallecidos', async (req, res) => {
       scrapeSendero()
     ]);
 
-    console.log(`Datos de Cementerio Metropolitano: ${JSON.stringify(cementerioMetropolitano)}`);
-    console.log(`Datos de Nuestros Parques: ${JSON.stringify(nuestrosParques)}`);
-    console.log(`Datos de Parque del Sendero: ${JSON.stringify(parqueSendero)}`);
+    //console.log(`Datos de Cementerio Metropolitano: ${JSON.stringify(cementerioMetropolitano)}`);
+    //console.log(`Datos de Nuestros Parques: ${JSON.stringify(nuestrosParques)}`);
+    //console.log(`Datos de Parque del Sendero: ${JSON.stringify(parqueSendero)}`);
 
     // Combinamos todos los resultados en un solo array
     const resultadoFinal = [
@@ -39,5 +39,5 @@ app.get('/fallecidos', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}/fallecidos`);
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
